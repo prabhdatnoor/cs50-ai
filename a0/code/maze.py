@@ -1,18 +1,21 @@
+from shutil import ExecError
 import sys
 from dataclasses import dataclass
-from typing import TypeAlias
+from typing import TypeAlias, override
+
+Point: TypeAlias = tuple[int, int]
 
 
 @dataclass
 class Node:
-    state: str
+    state: Point
     parent: "Node | None"
-    action: list[int]
+    action: str
 
 
 @dataclass
 class StackFrontier:
-    frontier: list[Node]
+    frontier: list[Node] = []
 
     def add(self, n: Node):
         self.frontier.append(n)
@@ -20,11 +23,11 @@ class StackFrontier:
     def empty(self):
         return len(self.frontier) == 0
 
-    def exists(self, n: Node):
-        return any(node.state == n.state for node in self.frontier)
+    def exists(self, p: Point):
+        return any(node.state == p for node in self.frontier)
 
     def peek(self):
-        return self.frontier[-1]
+        return self.frontier[-1] if not self.empty() else None
 
     def pop(self):
         if self.empty():
@@ -34,26 +37,30 @@ class StackFrontier:
 
 
 class QueueFrontier(StackFrontier):
-    def remove(self):
+    @override
+    def pop(self):
         if self.empty():
             raise Exception("Frontier empty!")
 
         return self.frontier.pop(0)
 
+    @override
+    def peek(self):
+        return self.frontier[0] if not self.empty() else None
 
-Point: TypeAlias = tuple[int, int]
 
+SimplifiedNodeRepr: TypeAlias = tuple[str, tuple[int,int]]
 
 @dataclass
 class Maze:
     height: int
     width: int
     walls: list[list[bool]]
-    solution: list[list[Point]] | None
+    solution: tuple[list[str], list[Point]] | None
     start: Point
     goal: Point
 
-    explored: list[Point]
+    explored: set[Point]
     num_explored: int
 
     def __init__(self, filename: str):
@@ -112,7 +119,7 @@ class Maze:
             print()
         print()
 
-    def neighbors(self, state: Point) -> list[tuple[str, Point]]:
+    def neighbors(self, state: Point) -> list[SimplifiedNodeRepr]:
         row, col = state
         candidates = [
             ("up", (row - 1, col)),
@@ -121,7 +128,7 @@ class Maze:
             ("right", (row, col + 1)),
         ]
 
-        result: list[tuple[str, Point]] = []
+        result: list[SimplifiedNodeRepr] = []
         for action, (r, c) in candidates:
             if 0 <= r < self.height and 0 <= c < self.width and not self.walls[r][c]:
                 result.append((action, (r, c)))
@@ -129,6 +136,51 @@ class Maze:
 
     def solve(self):
         """Finds a solution to maze, if one exists."""
+
+        # keep track of number of states explored
+        self.num_explored = 0
+
+        # initialize frontier to just the starting position
+        start = Node(state=self.start, parent=None, action="")
+        frontier = StackFrontier()
+        frontier.add(start)
+
+        # empty explored set
+        self.explored = set()
+
+        while not frontier.empty():
+            # remove node from frontier
+            node = frontier.pop()
+
+            # if node contains goal state
+            if node.state == self.goal
+                actions: list[str] = []
+                cells: list[Point] = []
+
+                while node.parent is not None:
+                    actions.append(node.action)
+                    cells.append(node.state)
+                    node = node.parent
+
+                actions.reverse()
+                cells.reverse()
+
+                self.solution = (actions, cells)
+                return
+
+            # add node to explored set
+            self.explored.add(node.state)
+            self.num_explored += 1
+
+            for action, state in self.neighbors(node.state):
+                # if not already in the frontier or the explored set, add to frontier
+                if not frontier.exists(state) and state not in self.explored:
+                    child = Node(state=state, parent=node, action = action)
+                    frontier.add(child)
+
+        else:
+            raise Exception ("No solution!")
+
 
     def output_image(
         self, filename: str, show_solution: bool = True, show_explored: bool = False
