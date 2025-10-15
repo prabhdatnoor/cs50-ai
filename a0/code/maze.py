@@ -1,6 +1,6 @@
 from shutil import ExecError
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TypeAlias, override
 
 Point: TypeAlias = tuple[int, int]
@@ -15,7 +15,7 @@ class Node:
 
 @dataclass
 class StackFrontier:
-    frontier: list[Node] = []
+    frontier: list[Node] = field(default_factory=list)
 
     def add(self, n: Node):
         self.frontier.append(n)
@@ -49,7 +49,8 @@ class QueueFrontier(StackFrontier):
         return self.frontier[0] if not self.empty() else None
 
 
-SimplifiedNodeRepr: TypeAlias = tuple[str, tuple[int,int]]
+SimplifiedNodeRepr: TypeAlias = tuple[str, tuple[int, int]]
+
 
 @dataclass
 class Maze:
@@ -153,7 +154,7 @@ class Maze:
             node = frontier.pop()
 
             # if node contains goal state
-            if node.state == self.goal
+            if node.state == self.goal:
                 actions: list[str] = []
                 cells: list[Point] = []
 
@@ -175,12 +176,11 @@ class Maze:
             for action, state in self.neighbors(node.state):
                 # if not already in the frontier or the explored set, add to frontier
                 if not frontier.exists(state) and state not in self.explored:
-                    child = Node(state=state, parent=node, action = action)
+                    child = Node(state=state, parent=node, action=action)
                     frontier.add(child)
 
         else:
-            raise Exception ("No solution!")
-
+            raise Exception("No solution!")
 
     def output_image(
         self, filename: str, show_solution: bool = True, show_explored: bool = False
