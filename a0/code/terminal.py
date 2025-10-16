@@ -61,6 +61,11 @@ class Board:
                     case _:
                         yield (x, y)
 
+    # game over or not?
+    def terminal(self) -> bool:
+        # if game is not_finished, then game not over return false
+        return self.get_result() != GameResult.NOT_FINISHED
+
     # place player x
     def placeX(self, tile: Point):
         self.place(Player.X, tile)
@@ -71,10 +76,6 @@ class Board:
 
     # Calculate current game state
     def get_result(self) -> GameResult:
-        # if there are still actions to do, return result
-        if next(self.actions(), None) is not None:
-            return GameResult.NOT_FINISHED
-
         # check rows
         for row in self.board:
             # all X's
@@ -130,6 +131,10 @@ class Board:
             i, j = self.side - 1, self.side - 1
             x_count, o_count = 0, 0
             increment = -1
+
+        # if there are still actions to do, return result
+        if next(self.actions(), None) is not None:
+            return GameResult.NOT_FINISHED
 
         # no wins found
         return GameResult.TIE
