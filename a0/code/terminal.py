@@ -64,7 +64,7 @@ class Board:
     # game over or not?
     def terminal(self) -> bool:
         # if game is not_finished, then game not over return false
-        return self.get_result() != GameResult.NOT_FINISHED
+        return self.utility() != GameResult.NOT_FINISHED
 
     # place player x
     def placeX(self, tile: Point):
@@ -75,7 +75,7 @@ class Board:
         self.place(Player.O, tile)
 
     # Calculate current game state
-    def get_result(self) -> GameResult:
+    def utility(self) -> GameResult:
         # check rows
         for row in self.board:
             # all X's
@@ -172,4 +172,4 @@ board.placeX((0, 1))
 board.placeO((2, 1))
 
 print(board)
-print(int(board.get_result()))
+print(int(board.utility()))
