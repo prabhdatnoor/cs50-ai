@@ -1,11 +1,12 @@
 from dataclasses import dataclass, field
+from decimal import DefaultContext
 from enum import Enum
 from typing import TypeAlias, override
 
 Point: TypeAlias = tuple[int, int]
 
 
-class Value(Enum):
+class Player(Enum):
     Empty = 0
     X = 1
     O = 2  # noqa: E741
@@ -19,29 +20,40 @@ class GameState(Enum):
 
 @dataclass
 class Board:
-    side: int = field(default=3)
-    board: list[list[Value]] = field(default_factory=list)
+    # side size of board
+    side: int = 3
+    board: list[list[Player]] = field(default_factory=list)
 
-    def __init__(self):
-        self.board = [[Value.Empty for _ in range(self.side)] for _ in range(self.side)]
+    # whose turn is it?
+    current_turn: Player = Player.Empty
 
-    def place(self, value: Value, tile: Point):
+    #
+    def __post_init__(self):
+        # default value or else
+        self.board = (
+            [[Player.Empty for _ in range(self.side)] for _ in range(self.side)]
+            if self.board == []
+            else self.board
+        )
+
+    # place player symbol on board
+    def place(self, value: Player, tile: Point):
         self.board[tile[1]][tile[0]] = value
 
     def placeX(self, tile: Point):
-        self.place(Value.X, tile)
+        self.place(Player.X, tile)
 
     def placeY(self, tile: Point):
-        self.place(Value.O, tile)
+        self.place(Player.O, tile)
 
     def get_state(self) -> GameState:
         # check rows
         for row in self.board:
             # all X's
-            if row.count(Value.X) == self.side:
+            if row.count(Player.X) == self.side:
                 return GameState.X_WIN
             # all O's
-            elif row.count(Value.O) == self.side:
+            elif row.count(Player.O) == self.side:
                 return GameState.O_WIN
 
         # check columns
@@ -49,9 +61,9 @@ class Board:
             x_count, o_count = 0, 0
             for c in range(self.side):
                 match self.board[r][c]:
-                    case Value.X:
+                    case Player.X:
                         x_count += 1
-                    case Value.O:
+                    case Player.O:
                         o_count += 1
                     case _:
                         pass
@@ -71,9 +83,9 @@ class Board:
             # check diagonals
             while i >= 0 and j >= 0 and i < self.side and j < self.side:
                 match self.board[i][j]:
-                    case Value.X:
+                    case Player.X:
                         x_count += 1
-                    case Value.O:
+                    case Player.O:
                         o_count += 1
                     case _:
                         pass
@@ -108,9 +120,9 @@ class Board:
 
             for j in range(s):
                 match self.board[i][j]:
-                    case Value.X:
+                    case Player.X:
                         board_str += "|  X  "
-                    case Value.O:
+                    case Player.O:
                         board_str += "|  O  "
                     case _:
                         board_str += "|     "
