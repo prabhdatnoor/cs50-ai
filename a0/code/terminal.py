@@ -27,7 +27,6 @@ class Board:
     # whose turn is it?
     current_turn: Player = Player.Empty
 
-    #
     def __post_init__(self):
         # default value or else
         self.board = (
@@ -40,12 +39,15 @@ class Board:
     def place(self, value: Player, tile: Point):
         self.board[tile[1]][tile[0]] = value
 
+    # place player x
     def placeX(self, tile: Point):
         self.place(Player.X, tile)
 
-    def placeY(self, tile: Point):
+    # place player O
+    def placeO(self, tile: Point):
         self.place(Player.O, tile)
 
+    # Calculate current game state
     def get_state(self) -> GameState:
         # check rows
         for row in self.board:
@@ -136,6 +138,6 @@ class Board:
 board = Board()
 
 board.placeX((0, 1))
-board.placeY((2, 1))
+board.placeO((2, 1))
 
 print(board)
