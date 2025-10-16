@@ -3,6 +3,7 @@ from decimal import DefaultContext
 from enum import Enum
 from tokenize import PlainToken
 from typing import TypeAlias, override
+from collections.abc import Generator
 
 Point: TypeAlias = tuple[int, int]
 
@@ -45,6 +46,19 @@ class Board:
             self.current_turn = Player.O
         else:
             self.current_turn = Player.X
+
+    def get_tile(self, tile: Point) -> Player:
+        return self.board[tile[1]][tile[0]]
+
+    # legal moves in the board currently
+    def actions(self) -> Generator[Point]:
+        for x in range(self.side):
+            for y in range(self.side):
+                match self.get_tile((x, y)):
+                    case Player.X | Player.O:
+                        pass
+                    case _:
+                        yield (x, y)
 
     # place player x
     def placeX(self, tile: Point):
