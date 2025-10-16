@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from decimal import DefaultContext
-from enum import Enum
+from enum import Enum, IntEnum
 from tokenize import PlainToken
 from typing import TypeAlias, override
 from collections.abc import Generator
@@ -8,16 +8,17 @@ from collections.abc import Generator
 Point: TypeAlias = tuple[int, int]
 
 
-class Player(Enum):
+class Player(IntEnum):
     Empty = 0
     X = 1
     O = 2  # noqa: E741
 
 
-class GameState(Enum):
+class GameResult(IntEnum):
     O_WIN = -1
     TIE = 0
     X_WIN = 1
+    NOT_FINISHED = 2
 
 
 @dataclass
@@ -69,15 +70,19 @@ class Board:
         self.place(Player.O, tile)
 
     # Calculate current game state
-    def get_state(self) -> GameState:
+    def get_result(self) -> GameResult:
+        # if there are still actions to do, return result
+        if next(self.actions(), None) is not None:
+            return GameResult.NOT_FINISHED
+
         # check rows
         for row in self.board:
             # all X's
             if row.count(Player.X) == self.side:
-                return GameState.X_WIN
+                return GameResult.X_WIN
             # all O's
             elif row.count(Player.O) == self.side:
-                return GameState.O_WIN
+                return GameResult.O_WIN
 
         # check columns
         for r in range(self.side):
@@ -92,9 +97,9 @@ class Board:
                         pass
 
             if x_count == self.side:
-                return GameState.X_WIN
+                return GameResult.X_WIN
             elif o_count == self.side:
-                return GameState.O_WIN
+                return GameResult.O_WIN
 
         i, j = 0, 0
         x_count, o_count = 0, 0
@@ -117,9 +122,9 @@ class Board:
                 j += increment
 
             if x_count == self.side:
-                return GameState.X_WIN
+                return GameResult.X_WIN
             elif o_count == self.side:
-                return GameState.O_WIN
+                return GameResult.O_WIN
 
             # for second iteration (loop only runs twice)
             i, j = self.side - 1, self.side - 1
@@ -127,7 +132,7 @@ class Board:
             increment = -1
 
         # no wins found
-        return GameState.TIE
+        return GameResult.TIE
 
     @override
     def __repr__(self) -> str:
@@ -162,3 +167,4 @@ board.placeX((0, 1))
 board.placeO((2, 1))
 
 print(board)
+print(int(board.get_result()))
