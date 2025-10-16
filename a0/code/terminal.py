@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from decimal import DefaultContext
 from enum import Enum
+from tokenize import PlainToken
 from typing import TypeAlias, override
 
 Point: TypeAlias = tuple[int, int]
@@ -35,9 +36,15 @@ class Board:
             else self.board
         )
 
-    # place player symbol on board
+    # place player symbol on board and switch next turn
     def place(self, value: Player, tile: Point):
         self.board[tile[1]][tile[0]] = value
+
+        # switch the turn:
+        if value == Player.X:
+            self.current_turn = Player.O
+        else:
+            self.current_turn = Player.X
 
     # place player x
     def placeX(self, tile: Point):
