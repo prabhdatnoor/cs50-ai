@@ -61,7 +61,35 @@ class Board:
             elif o_count == self.side:
                 return GameState.O_WIN
 
-        # check diagnols
+        i, j = 0, 0
+        x_count, o_count = 0, 0
+        # direction of diagonal
+        increment = 1
+
+        # run twice for 2 diagonals
+        for _ in range(2):
+            # check diagonals
+            while i >= 0 and j >= 0 and i < self.side and j < self.side:
+                match self.board[i][j]:
+                    case Value.X:
+                        x_count += 1
+                    case Value.O:
+                        o_count += 1
+                    case _:
+                        pass
+
+                i += increment
+                j += increment
+
+            if x_count == self.side:
+                return GameState.X_WIN
+            elif o_count == self.side:
+                return GameState.O_WIN
+
+            # for second iteration (loop only runs twice)
+            i, j = self.side - 1, self.side - 1
+            x_count, o_count = 0, 0
+            increment = -1
 
         # no wins found
         return GameState.TIE
