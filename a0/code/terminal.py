@@ -12,9 +12,9 @@ class Value(Enum):
 
 
 class GameState(Enum):
+    O_WIN = -1
     TIE = 0
     X_WIN = 1
-    O_WIN = 2
 
 
 @dataclass
